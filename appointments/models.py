@@ -9,18 +9,27 @@ from doctors.models import Doctors,TimeSlot
 
 
 class PatientAppointment(models.Model):
+
+     STATUS_CHOICES = [
+    ('scheduled', 'Scheduled'),
+    ('in-progress', 'In Progress'),
+    ('completed', 'Completed'),
+    ('cancelled', 'Cancelled'),
+]
+
+status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='scheduled')
+
+    
     department_name=models.CharField(max_length=50)
     doctor = models.ForeignKey(Doctors,on_delete=models.CASCADE)
     appointment_date = models.DateField(default=date.today)
     timeslot=models.ForeignKey(TimeSlot,on_delete=models.CASCADE,related_name='appointments')
-    patient_name = models.CharField(max_length=100)
-    patient_email = models.EmailField()
-    patient_phone = models.CharField(max_length=15)
+    patient=models.ForeignKey('patients.Patient',on_delete=models.CASCADE)
     reason_to_visit = models.TextField()
     
     
     def __str__(self):
-        return f"Patient {self.patient_name} on {self.appointment_date} at {self.timeslot} with {self.doctor.doctor_name}"
+        return f"{self.patient.full_name} - {self.appointment_date} - {self.timeslot}"
     
     
     class Meta:
