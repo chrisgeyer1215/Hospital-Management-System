@@ -9,15 +9,16 @@ from doctors.models import Doctors,TimeSlot
 
 
 class PatientAppointment(models.Model):
-    
-    STATUS_CHOICES = [
+
+     STATUS_CHOICES = [
     ('scheduled', 'Scheduled'),
     ('in-progress', 'In Progress'),
     ('completed', 'Completed'),
     ('cancelled', 'Cancelled'),
 ]
 
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='scheduled')
+status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='scheduled')
+
     
     department_name=models.CharField(max_length=50)
     doctor = models.ForeignKey(Doctors,on_delete=models.CASCADE)

@@ -2,14 +2,14 @@ from django.core.mail import EmailMultiAlternatives
 from rest_framework.response import Response
 from rest_framework import status, generics
 from .models import PatientAppointment, UserMessages
-from .serializers import Patientappointmentserializer,UserMessageSerializer
+from .serializers import Patientnew_appointmentserializer,UserMessageSerializer
 from django.utils import timezone
 from pydoc import doc
 from rest_framework.views import APIView
 
 class PatientAppointmentCreateView(generics.CreateAPIView):
     queryset = PatientAppointment.objects.all()
-    serializer_class = Patientappointmentserializer
+    serializer_class = Patientnew_appointmentserializer
     
     def perform_create(self, serializer):
         if not serializer.is_valid():
@@ -54,7 +54,7 @@ class PatientAppointmentCreateView(generics.CreateAPIView):
 
 
 class PatientAppointmentListView(generics.ListAPIView):
-    serializer_class = Patientappointmentserializer
+    serializer_class = Patientnew_appointmentserializer
     def get_queryset(self):
         doctor_id = self.request.query_params.get('doctor')  # from ?doctor=Dr. Smith
         today = timezone.localdate()
@@ -65,7 +65,7 @@ class PatientAppointmentListView(generics.ListAPIView):
                 appointment_date=today
             )
         
-        # Return none if doctor not provided to avoid exposing all appointments
+        # Return none if doctor not provided to avoid exposing all new_appointments
         return PatientAppointment.objects.none()
     
     
@@ -94,7 +94,7 @@ class UpdatePatientAppointmentView(APIView):
     
     
 class PatientAppointmentAllListView(generics.ListAPIView):
-    serializer_class = Patientappointmentserializer
+    serializer_class = Patientnew_appointmentserializer
     
     def get_queryset(self):
         doctor_id = self.request.query_params.get('doctor')
