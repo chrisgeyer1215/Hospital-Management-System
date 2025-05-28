@@ -44,6 +44,7 @@ class Awards(models.Model):
 
 
 class Doctors(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='doctor_profile')
     # Choices for department_name
     DEPARTMENT_CHOICES = [
         ('Cardiology', 'Cardiology'),

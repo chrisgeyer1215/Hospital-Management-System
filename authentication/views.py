@@ -13,6 +13,15 @@ from authentication.serializers import ForgotPasswordRequestSerializer, \
 from smtplib import SMTPException
 from django.http.response import BadHeaderError
 from django.contrib.auth import logout
+from rest_framework.permissions import IsAuthenticated
+
+from doctors.models import Doctors
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
+
+
+from .serializers import *
+from rest_framework.decorators import permission_classes
 
 
 class RegisterView(APIView):
@@ -40,7 +49,7 @@ class LoginView(APIView):
             
             return Response({
                 'access_token': serializer.validated_data['access'],  # Correct key
-                'refresh_token': serializer.validated_data['refresh'],  # Correct key
+                'refresh_token': serializer.validated_data['refresh'],
             }, status=status.HTTP_200_OK)
 
         print("Serializer Errors:", serializer.errors)
@@ -164,4 +173,26 @@ class ResetPasswordView(APIView):
         passwordChangeSuccessEmail(user.email)
         
         return Response({"message": "Password has been reset successfully. Redirecting to login page."}, status=status.HTTP_200_OK)
+    
+    
+    
+    
+class DoctorDashBoardAccessCheck(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        role = request.data.get('role')
+
+        if role != 'Doctor':
+            return Response({"detail": "Access denied. Not a doctor."}, status=status.HTTP_403_FORBIDDEN)
+
+        if not Doctors.objects.filter(user__email=email).exists():
+            return Response({"detail": "Doctor profile not found."}, status=status.HTTP_403_FORBIDDEN)
+
+        return Response({"allowed": True})
+        
+        
             
+        
+        
+        
+

@@ -17,17 +17,6 @@ class TimeSlotSerializer(serializers.ModelSerializer):
         model=TimeSlot
         fields= ['id', 'start_time', 'end_time', 'appointment_date']
         
-        # def get_is_booked(self, obj):
-        #     request = self.context.get('request')
-        #     appointment_date = request.query_params.get('appointment_date') if request else None
-
-        #     if appointment_date:
-        #         return PatientAppointment.objects.filter(
-        #         timeslot=obj,
-        #         appointment_date=appointment_date
-        #     ).exists()
-
-        #     return False
             
         
 

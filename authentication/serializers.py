@@ -4,9 +4,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 from .utils import generate_verification_code, send_verification_email
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from django.utils import timezone
 from datetime import timedelta
+from doctors.models import Doctors
+from patients.models import Patient
 
 User = get_user_model()
 
@@ -40,11 +43,26 @@ class RegistrationSerializer(serializers.ModelSerializer):
         )
         
         print(user)
+        Patient.objects.create(
+            user=user,
+            full_name=validated_data['username']
+        )
         
         send_verification_email(user.email, code)
         
         refresh = RefreshToken.for_user(user)
         refresh['username'] = user.username
+        
+        if Doctors.objects.filter(user=user).exists():
+            doctor = Doctors.objects.get(user=user)
+            refresh['role'] = 'Doctor'
+            refresh['id'] = doctor.id
+        else:
+            patient = Patient.objects.get(user=user)
+            print("patient",patient.id)
+            refresh['role'] = 'Patient'
+            refresh['id'] = patient.id
+        
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
 
@@ -80,10 +98,35 @@ class LoginSerializer(serializers.Serializer):
         
         if user is None:
             raise serializers.ValidationError("Incorrect password.")
-
-        # Generate JWT token
+        
+                # Generate JWT token
         refresh = RefreshToken.for_user(user)
         refresh['username'] = user.username
+        refresh['email']=user.email
+        
+        
+        
+        
+        if Doctors.objects.filter(user=user).exists():
+            doctor=Doctors.objects.get(user=user)
+            
+            print("User", doctor)
+           
+            
+            refresh['role'] = 'Doctor'
+            refresh['id']=doctor.id
+            
+        else:
+            patient = Patient.objects.get(user=user)
+            print("patient",patient.id)
+            refresh['role'] = 'Patient'
+            refresh['id'] = patient.id
+            
+            
+            
+            
+
+
 
         return {
             'refresh': str(refresh),
@@ -103,4 +146,13 @@ class ResetPasswordSerializer(serializers.Serializer):
         if data["new_password"] != data["confirm_password"]:
             raise serializers.ValidationError("Passwords do not match.")
         return data
+    
+    
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self,attrs):
+        data=super().validate(attrs)
+        data['role']-self.user.role
+        return data
+        
+        
     

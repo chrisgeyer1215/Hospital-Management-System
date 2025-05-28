@@ -10,6 +10,28 @@ from doctors.serializers import TimeSlotSerializer
 from .models import TimeSlot
 from appointments.models import PatientAppointment
 from pip._vendor.urllib3.util.timeout import current_time
+from rest_framework.views import APIView
+from .models import Doctors
+from rest_framework.response import Response
+from rest_framework import status
+from .serializers import DoctorsSerializers
+
+
+
+class UpdateDoctorAvailability(APIView):
+    def patch(self,request,doctor_id):
+        try:
+            doctor=Doctors.objects.get(id=doctor_id)
+        except Doctors.DoesNotExist:
+            return Response({"detail": "Doctor not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        updated_availability=request.data.get('availability',[])
+        
+        doctor.availability= updated_availability
+        doctor.save()
+        serializer = DoctorsSerializers(doctor)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        
 
 class DoctorsListCreateView(generics.ListCreateAPIView):
     queryset = Doctors.objects.all()
@@ -20,6 +42,8 @@ class DoctorsListCreateView(generics.ListCreateAPIView):
         # Custom logic before saving the doctor instance
         # This will handle image uploading correctly
         serializer.save()
+        
+        
 
 
 class DoctorsListView(generics.ListAPIView):
@@ -90,6 +114,15 @@ class DoctorsDetailView(generics.RetrieveUpdateAPIView):
             return doctor
         except Doctors.DoesNotExist:
             raise NotFound("Doctor with the specified name not found.")
+        
+        
+        
+        
+class DoctorAvailabilityView(generics.RetrieveAPIView):
+    queryset=Doctors.objects.all()
+    serializer_class = DoctorsSerializers
+    lookup_field = 'pk'
+
 
 
 

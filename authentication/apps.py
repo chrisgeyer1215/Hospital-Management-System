@@ -1,6 +1,8 @@
 from django.apps import AppConfig
 
+class AppointmentsConfig(AppConfig):
+    name = 'appointments'
 
-class AuthenticationConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'authentication'
+    def ready(self):
+        # Import signals to connect them
+        import appointments.signals
